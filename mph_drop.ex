@@ -1,6 +1,7 @@
 defmodule MphDrop do
   def mph_drop do
-    drop_pid = spawn(ProcessDrop, :drop, [])
+    Process.flag(:trap_exit, true)
+    drop_pid = spawn_link(ProcessDrop, :drop, [])
     convert(drop_pid)
   end
 
@@ -9,6 +10,8 @@ defmodule MphDrop do
       {planemo, distance} ->
         send(drop_pid, {self(), planemo, distance})
         convert(drop_pid)
+      {:EXIT, pid, reason} ->
+        IO.puts("Failure: #{inspect(pid)} #{inspect(reason)}")
       {planemo, distance, velocity} ->
         mph_velocity = 2.23693629 * velocity
         IO.write("On #{planemo}, a fall of #{distance} meters ")
